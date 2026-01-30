@@ -1,4 +1,4 @@
-package com.demo.first_spring_boot.controller;
+package com.demo.first_spring_boot.app;
 
 
 public class User {
