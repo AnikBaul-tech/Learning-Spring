@@ -59,4 +59,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return ResponseEntity.ok(userDb.get(id));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchUser(@RequestParam(required = false) String name){
+        List<User> users = userDb.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).toList();
+        return ResponseEntity.ok(new ArrayList<>(users));
+    }
 }
