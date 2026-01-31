@@ -65,4 +65,9 @@ public class UserController {
         List<User> users = userDb.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).toList();
         return ResponseEntity.ok(new ArrayList<>(users));
     }
+
+    @GetMapping("/info")
+    public String getInfo(@RequestHeader("User-Agent") String userAgent){
+        return userAgent;
+    }
 }
