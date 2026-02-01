@@ -1,46 +1,46 @@
-package com.demo.first_spring_boot.app;
+package com.demo.first_spring_boot.app.controller;
 
+import com.demo.first_spring_boot.app.service.UserService;
+import com.demo.first_spring_boot.app.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private Map<Integer,User> userDb = new HashMap<>();
+    public UserService userService = new UserService();
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> getUsers(){
-        return new ArrayList<>(userDb.values());
+        return userService.getAllUser();
     }
 
     @PostMapping
-    public ResponseEntity<String> createUser(@RequestBody User user){
-        userDb.putIfAbsent(user.getId(),user);
-        System.out.println("New User Created "+user.getId()+" "+user.getEmail());
-        return ResponseEntity.status(HttpStatus.CREATED).body("User Created");
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        User createdUser = userService.createUser(user);
+        return new ResponseEntity<>(createdUser,HttpStatus.CREATED);
     }
 
     @PutMapping
     public  ResponseEntity<User> updateUser(@RequestBody User user){
-        if (!userDb.containsKey(user.getId()))
-            return new ResponseEntity<>(user , HttpStatus.NOT_FOUND);
-
-        userDb.put(user.getId(), user);
-
+        User updated = userService.updateUser(user);
+        if(updated == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable int id){
-        if (!userDb.containsKey(id))
+        boolean isDeleted = userService.deleteUser(id);
+        if (!isDeleted)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        userDb.remove(id);
         return ResponseEntity.ok("User Deleted");
     }
 
@@ -48,22 +48,23 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUser(@PathVariable(value = "userId",required = false) int id){
-        if (!userDb.containsKey(id))
+        User user = userService.getUserById(id);
+        if (user == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        return ResponseEntity.ok(userDb.get(id));
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/{userId}/orders/{orderId}")
     public ResponseEntity<User> getUserOrder(@PathVariable("userId") int id,@PathVariable(required = false)  int orderId){
-        if (!userDb.containsKey(id))
+        User user = userService.getUserById(id);
+        if (user == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        return ResponseEntity.ok(userDb.get(id));
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<User>> searchUser(@RequestParam(required = false) String name){
-        List<User> users = userDb.values().stream().filter(u -> u.getName().equalsIgnoreCase(name)).toList();
-        return ResponseEntity.ok(new ArrayList<>(users));
+        return ResponseEntity.ok(userService.searchUser(name));
     }
 
     @GetMapping("/info")

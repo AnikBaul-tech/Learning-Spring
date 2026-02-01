@@ -1,4 +1,4 @@
-package com.demo.first_spring_boot.app;
+package com.demo.first_spring_boot.app.model;
 
 
 public class User {
